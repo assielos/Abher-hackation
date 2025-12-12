@@ -66,6 +66,9 @@ async def ping():
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ANN001
+    # Don't catch HTTPException - let FastAPI handle it
+    if isinstance(exc, HTTPException):
+        raise exc
     logger.exception("Unhandled error on %s %s: %s", request.method, request.url, exc)
     return JSONResponse(
         status_code=500,
