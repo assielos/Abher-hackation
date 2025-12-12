@@ -154,16 +154,21 @@ async def create_request(
             )
             logger.info("Verification result: confidence=%d", verify_result.confidence)
             
-            # Reject request if confidence < 80%
+            # Decision based on confidence level
             if verify_result.confidence < 80:
+                # Reject if confidence < 80%
                 models.reject_request(request_id)
                 request_status = models.STATUS_REJECTED
                 logger.info("Request %d rejected due to low confidence (%d%%)", request_id, verify_result.confidence)
-            else:
-                # Auto-approve if confidence >= 80%
+            elif verify_result.confidence >= 95:
+                # Auto-approve if confidence >= 95%
                 models.approve_request(request_id)
                 request_status = models.STATUS_APPROVED
-                logger.info("Request %d approved with confidence %d%%", request_id, verify_result.confidence)
+                logger.info("Request %d auto-approved with high confidence (%d%%)", request_id, verify_result.confidence)
+            else:
+                # Pending review if confidence 80-94%
+                request_status = models.STATUS_PENDING
+                logger.info("Request %d pending review with confidence (%d%%)", request_id, verify_result.confidence)
                 
         except Exception as ve:
             logger.warning("Verification failed: %s", ve)
