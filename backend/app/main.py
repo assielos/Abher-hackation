@@ -154,13 +154,22 @@ async def create_request(
             )
             logger.info("Verification result: confidence=%d", verify_result.confidence)
             
-            # Decision based on confidence level
+            # Reject if confidence < 80%
             if verify_result.confidence < 80:
-                # Reject if confidence < 80%
                 models.reject_request(request_id)
-                request_status = models.STATUS_REJECTED
                 logger.info("Request %d rejected due to low confidence (%d%%)", request_id, verify_result.confidence)
-            elif verify_result.confidence >= 95:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "message": "تم رفض الطلب - بيانات التقرير غير متطابقة",
+                        "confidence": verify_result.confidence,
+                        "verification": verification.model_dump(),
+                        "status": "REJECTED"
+                    }
+                )
+            
+            # Decision based on confidence level
+            if verify_result.confidence >= 95:
                 # Auto-approve if confidence >= 95%
                 models.approve_request(request_id)
                 request_status = models.STATUS_APPROVED
@@ -170,6 +179,8 @@ async def create_request(
                 request_status = models.STATUS_PENDING
                 logger.info("Request %d pending review with confidence (%d%%)", request_id, verify_result.confidence)
                 
+        except HTTPException:
+            raise  # Re-raise HTTPException (rejection)
         except Exception as ve:
             logger.warning("Verification failed: %s", ve)
             request_status = models.STATUS_PENDING

@@ -976,11 +976,37 @@
 
     try {
       const res = await fetch(`${API_BASE}/requests`, { method: "POST", body: data });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "تعذر إرسال الطلب");
-      }
       const body = await res.json();
+      
+      // Handle rejection (confidence < 80%)
+      if (!res.ok) {
+        if (body.detail && body.detail.status === "REJECTED") {
+          // Show rejection with verification details
+          currentRequestId = null;
+          requestIdSpan.textContent = "-";
+          
+          // Update status badge to rejected
+          statusBadge.className = "status-badge rejected";
+          statusBadge.innerHTML = "<span>&#10007;</span> حالة الطلب: مرفوض - بيانات التقرير غير متطابقة";
+          
+          // Show verification results
+          if (body.detail.verification) {
+            showVerification(body.detail.verification);
+          }
+          
+          // Hide admin link section
+          document.querySelector(".admin-link-section").style.display = "none";
+          
+          form.style.display = "none";
+          resultSection.classList.add("active");
+          
+          submitBtn.disabled = false;
+          submitBtn.textContent = "إرسال الطلب";
+          return;
+        }
+        throw new Error(body.detail?.message || body.detail || "تعذر إرسال الطلب");
+      }
+      
       currentRequestId = body.request_id;
       
       requestIdSpan.textContent = body.request_id;
