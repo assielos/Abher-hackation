@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Request Accident CCTV Footage</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Request Accident CCTV Footage</h1>
+      <form id="requestForm">
+        <div>
+          <label for="address">National Address (short)</label>
+          <input id="address" name="national_address" placeholder="e.g., RARA3071" required />
+        </div>
+        <div>
+          <label for="incidentDatetime">Incident Date & Time (ISO)</label>
+          <input id="incidentDatetime" name="incident_datetime" type="datetime-local" required />
+        </div>
+        <div>
+          <label for="report">Incident Report (PDF/JPG)</label>
+          <input id="report" name="report" type="file" required />
+        </div>
+        <button type="submit">Submit Request</button>
+      </form>
+
+      <div id="status" class="status" style="display:none;"></div>
+      <div id="downloadSection" class="status" style="display:none;">
+        <p>Your video is ready.</p>
+        <a id="downloadLink" href="#" download>Download video</a>
+      </div>
+    </div>
+    <script src="./user.js"></script>
+  </body>
+</html>
+

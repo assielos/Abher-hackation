@@ -1,0 +1,75 @@
+body {
+  font-family: "Tajawal", "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f3f5f7;
+  color: #0f172a;
+}
+
+.container {
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+h1, h2 {
+  margin-top: 0;
+  color: #0c8a3e;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+input, button, textarea {
+  padding: 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f8fafc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: #0c8a3e;
+  box-shadow: 0 0 0 3px rgba(12, 138, 62, 0.15);
+  outline: none;
+}
+
+button {
+  background: #0c8a3e;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #0a7435;
+}
+
+.status {
+  margin-top: 16px;
+  padding: 12px;
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #14532d;
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+

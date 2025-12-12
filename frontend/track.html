@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تتبع الطلب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --green: #0c8a3e;
+      --green-light: #e8f5ed;
+      --border: #e2e8f0;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Tajawal", sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      padding: 30px 16px;
+      color: var(--text);
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .search-form {
+      display: flex;
+      gap: 12px;
+    }
+    .search-input {
+      flex: 1;
+      height: 52px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--green);
+    }
+    .search-btn {
+      height: 52px;
+      padding: 0 28px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .result-card {
+      display: none;
+    }
+    .result-card.show {
+      display: block;
+    }
+    .request-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .request-id {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .request-id strong {
+      font-size: 20px;
+      color: var(--text);
+    }
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status-badge.approved {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .status-badge.ready {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-right: 30px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 28px;
+    }
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      right: -30px;
+      top: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--border);
+    }
+    .timeline-item.completed .timeline-dot {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .timeline-item.current .timeline-dot {
+      background: white;
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(12, 138, 62, 0.15);
+    }
+    .timeline-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .timeline-item.completed .timeline-title {
+      color: var(--green);
+    }
+    .timeline-item.pending .timeline-title {
+      color: var(--muted);
+    }
+    .timeline-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .timeline-time {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    /* Request Details */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .detail-item {
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 10px;
+    }
+    .detail-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .detail-value {
+      font-weight: 700;
+      font-size: 15px;
+    }
+    
+    .download-section {
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--green-light);
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+    }
+    .download-section.show {
+      display: block;
+    }
+    .download-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: var(--green);
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    
+    .error-msg {
+      background: #fef2f2;
+      color: #991b1b;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-top: 16px;
+      display: none;
+    }
+    .error-msg.show {
+      display: block;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .map-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    #map {
+      width: 100%;
+      height: 250px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .search-form {
+        flex-direction: column;
+      }
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="page-title">تتبع الطلب</h1>
+      <p class="page-subtitle">أدخل رقم الطلب لمعرفة حالته ومتابعة تقدمه</p>
+      
+      <div class="search-form">
+        <input type="text" id="requestIdInput" class="search-input" placeholder="أدخل رقم الطلب" inputmode="numeric">
+        <button id="searchBtn" class="search-btn">بحث</button>
+      </div>
+      
+      <div id="errorMsg" class="error-msg"></div>
+    </div>
+    
+    <div id="resultCard" class="card result-card">
+      <div class="request-header">
+        <div class="request-id">
+          رقم الطلب: <strong id="displayRequestId">-</strong>
+        </div>
+        <div id="statusBadge" class="status-badge approved">مقبول</div>
+      </div>
+      
+      <div class="timeline">
+        <div id="step1" class="timeline-item completed">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">تم استلام الطلب</div>
+          <div class="timeline-desc">تم استلام طلبك وإرساله للمراجعة</div>
+          <div class="timeline-time" id="step1Time"></div>
+        </div>
+        
+        <div id="step2" class="timeline-item completed">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">تمت الموافقة</div>
+          <div class="timeline-desc">تمت الموافقة على طلبك من الجهة المختصة</div>
+          <div class="timeline-time" id="step2Time"></div>
+        </div>
+        
+        <div id="step3" class="timeline-item current">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">في انتظار رفع الفيديو</div>
+          <div class="timeline-desc">بانتظار قيام مسؤول المنشأة برفع مقطع الفيديو</div>
+          <div class="timeline-time" id="step3Time"></div>
+        </div>
+        
+        <div id="step4" class="timeline-item pending">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">جاهز للتحميل</div>
+          <div class="timeline-desc">الفيديو جاهز ويمكنك تحميله</div>
+          <div class="timeline-time" id="step4Time"></div>
+        </div>
+      </div>
+      
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">العنوان الوطني</div>
+          <div class="detail-value" id="detailAddress">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">التاريخ</div>
+          <div class="detail-value" id="detailDate">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">وقت البداية</div>
+          <div class="detail-value" id="detailStart">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">وقت النهاية</div>
+          <div class="detail-value" id="detailEnd">-</div>
+        </div>
+      </div>
+      
+      <!-- Map Section -->
+      <div class="map-section">
+        <div class="detail-label" style="margin-bottom:10px;">موقع الحادث التقريبي</div>
+        <div id="map"></div>
+      </div>
+      
+      <div id="downloadSection" class="download-section">
+        <div style="font-weight:700; color:var(--green); font-size:16px;">الفيديو جاهز للتحميل</div>
+        <a id="downloadBtn" href="#" class="download-btn" target="_blank">تحميل الفيديو</a>
+      </div>
+    </div>
+    
+    <a href="userr.html" class="back-link">&#8592; تقديم طلب جديد</a>
+  </div>
+
+  <script>
+    const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? "http://localhost:8000/api"
+      : "https://api.absher.gov.sa/api";
+
+    const searchBtn = document.getElementById("searchBtn");
+    const requestIdInput = document.getElementById("requestIdInput");
+    const errorMsg = document.getElementById("errorMsg");
+    const resultCard = document.getElementById("resultCard");
+
+    searchBtn.addEventListener("click", searchRequest);
+    requestIdInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") searchRequest();
+    });
+
+    // Check URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRequestId = urlParams.get("id");
+    if (urlRequestId) {
+      requestIdInput.value = urlRequestId;
+      searchRequest();
+    }
+
+    async function searchRequest() {
+      const requestId = requestIdInput.value.trim();
+      if (!requestId) {
+        showError("الرجاء إدخال رقم الطلب");
+        return;
+      }
+
+      errorMsg.classList.remove("show");
+      resultCard.classList.remove("show");
+
+      try {
+        // Get request status
+        const res = await fetch(`${API_BASE}/requests/${requestId}`);
+        if (!res.ok) {
+          throw new Error("لم يتم العثور على الطلب");
+        }
+        const data = await res.json();
+
+        // Get request details from public info endpoint
+        let details = {};
+        try {
+          const infoRes = await fetch(`${API_BASE}/requests/${requestId}/info`);
+          if (infoRes.ok) {
+            details = await infoRes.json();
+            console.log("Details loaded:", details);
+          } else {
+            console.log("Info fetch failed:", infoRes.status);
+          }
+        } catch (e) {
+          console.log("Info fetch error:", e);
+        }
+
+        displayResult(data, details);
+      } catch (err) {
+        showError(err.message || "حدث خطأ أثناء البحث");
+      }
+    }
+
+    function displayResult(data, details) {
+      console.log("Displaying result:", data, details);
+      document.getElementById("displayRequestId").textContent = data.request_id;
+      
+      // Update status badge
+      const badge = document.getElementById("statusBadge");
+      if (data.status === "READY") {
+        badge.textContent = "جاهز للتحميل";
+        badge.className = "status-badge ready";
+      } else if (data.status === "APPROVED") {
+        badge.textContent = "مقبول";
+        badge.className = "status-badge approved";
+      } else {
+        badge.textContent = "قيد المراجعة";
+        badge.className = "status-badge pending";
+      }
+
+      // Update timeline
+      const step1 = document.getElementById("step1");
+      const step2 = document.getElementById("step2");
+      const step3 = document.getElementById("step3");
+      const step4 = document.getElementById("step4");
+
+      // Reset all
+      [step1, step2, step3, step4].forEach(s => {
+        s.className = "timeline-item pending";
+      });
+
+      if (data.status === "PENDING_APPROVAL") {
+        step1.className = "timeline-item completed";
+        step2.className = "timeline-item current";
+      } else if (data.status === "APPROVED") {
+        step1.className = "timeline-item completed";
+        step2.className = "timeline-item completed";
+        step3.className = "timeline-item current";
+      } else if (data.status === "READY") {
+        step1.className = "timeline-item completed";
+        step2.className = "timeline-item completed";
+        step3.className = "timeline-item completed";
+        step4.className = "timeline-item completed";
+      }
+
+      // Update details
+      const addressVal = details.national_address || "-";
+      const dateVal = details.incident_date || "-";
+      const startVal = details.incident_start || "-";
+      const endVal = details.incident_end || "-";
+      
+      document.getElementById("detailAddress").textContent = addressVal;
+      document.getElementById("detailDate").textContent = dateVal;
+      document.getElementById("detailStart").textContent = startVal;
+      document.getElementById("detailEnd").textContent = endVal;
+      
+      // Show download section if ready
+      const downloadSection = document.getElementById("downloadSection");
+      if (data.status === "READY" && data.download_token) {
+        document.getElementById("downloadBtn").href = `${API_BASE}/requests/${data.request_id}/download?token=${data.download_token}`;
+        downloadSection.classList.add("show");
+      } else {
+        downloadSection.classList.remove("show");
+      }
+
+      resultCard.classList.add("show");
+      
+      // Initialize map after card is visible
+      const mapAddress = addressVal;
+      if (mapAddress && mapAddress !== "-") {
+        setTimeout(() => {
+          try {
+            initMap(mapAddress);
+            if (map) map.invalidateSize();
+          } catch (e) {
+            console.error("Map error:", e);
+          }
+        }, 400);
+      }
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add("show");
+      resultCard.classList.remove("show");
+    }
+
+    // Map initialization
+    let map = null;
+    let marker = null;
+
+    function initMap(address) {
+      // Sample coordinates for demo (Riyadh area)
+      // In production, this would use a geocoding API
+      const coords = getCoordinatesForAddress(address);
+      
+      if (!map) {
+        map = L.map('map').setView(coords, 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+      } else {
+        map.setView(coords, 15);
+      }
+
+      if (marker) {
+        marker.setLatLng(coords);
+      } else {
+        marker = L.marker(coords).addTo(map);
+      }
+      
+      marker.bindPopup(`<b>موقع الحادث</b><br>${address}`).openPopup();
+    }
+
+    // Generate coordinates based on address (demo simulation)
+    function getCoordinatesForAddress(address) {
+      // Use address characters to generate slightly different coordinates
+      // This is for demo purposes only
+      let hash = 0;
+      for (let i = 0; i < address.length; i++) {
+        hash = ((hash << 5) - hash) + address.charCodeAt(i);
+        hash = hash & hash;
+      }
+      
+      // Base coordinates (Riyadh)
+      const baseLat = 24.7136;
+      const baseLng = 46.6753;
+      
+      // Add small offset based on hash
+      const latOffset = (Math.abs(hash) % 1000) / 10000;
+      const lngOffset = (Math.abs(hash >> 8) % 1000) / 10000;
+      
+      return [baseLat + latOffset, baseLng + lngOffset];
+    }
+  </script>
+</body>
+</html>
+

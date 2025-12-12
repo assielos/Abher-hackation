@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلب تصريح لقطات الكاميرات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #0c8a3e;
+      --green-2: #0aa84c;
+      --bg: #f5f8fa;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      padding: 24px 12px 32px;
+      background: radial-gradient(circle at 20% 20%, #f7fbf8, #eef4f7 50%, #e8eef3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      direction: rtl;
+      font-family: "Tajawal", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+    }
+    .screen {
+      width: min(940px, 96vw);
+      background: var(--card);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(12, 138, 62, 0.08);
+    }
+    .header {
+      background: linear-gradient(120deg, var(--green), var(--green-2));
+      padding: 30px 34px 38px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 18% 22%, rgba(255,255,255,0.18), transparent 42%),
+                  radial-gradient(circle at 82% -5%, rgba(255,255,255,0.16), transparent 40%);
+      pointer-events: none;
+    }
+    .header-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 0 6px;
+      letter-spacing: -0.4px;
+    }
+    .header-subtitle {
+      margin: 0;
+      opacity: 0.92;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .progress {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .progress-segment {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.28);
+      border: 1px solid rgba(255,255,255,0.35);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: rgba(255,255,255,0.95);
+      border-radius: inherit;
+      transition: width 0.3s ease;
+    }
+    .content {
+      padding: 26px 26px 32px;
+      background: linear-gradient(180deg, #fff, #f9fbfc);
+    }
+    .section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 14px;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #16212a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(12, 138, 62, 0.1);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .label {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .optional {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .field { position: relative; }
+    .input,
+    input[type="file"],
+    input[type="date"],
+    input[type="time"],
+    input[type="text"] {
+      width: 100%;
+      height: 50px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 0 16px;
+      font-size: 15px;
+      background: #f9fafb;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .input:focus,
+    input[type="file"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="text"]:focus {
+      border-color: var(--green);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(12, 138, 62, 0.15);
+    }
+    .input::placeholder,
+    input::placeholder {
+      color: #9aa5b1;
+    }
+    input[type="time"] { -webkit-appearance: none; appearance: none; }
+    input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+    .date-input { text-align: right; direction: rtl; }
+    .time-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .time-field {
+      flex: 1;
+      min-width: 210px;
+    }
+    .time-label {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--green);
+    }
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 12px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      direction: ltr;
+      justify-content: center;
+    }
+    .time-input-group:focus-within {
+      border-color: var(--green);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(12, 138, 62, 0.15);
+    }
+    .time-num {
+      width: 50px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      background: white;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .time-num::-webkit-outer-spin-button,
+    .time-num::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .time-num:focus {
+      border-color: var(--green);
+    }
+    .time-sep {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .time-period {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      background: white;
+      color: var(--green);
+      cursor: pointer;
+      outline: none;
+    }
+    .time-period:focus {
+      border-color: var(--green);
+    }
+    .time-error {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #fef2f2;
+      border-radius: 8px;
+      display: none;
+    }
+    .time-error.show {
+      display: block;
+    }
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 2px 0;
+    }
+    .info-card {
+      border: 1px dashed rgba(12, 138, 62, 0.35);
+      border-radius: var(--radius);
+      background: #f6fbf7;
+      padding: 12px 14px;
+      margin: 8px 2px 0;
+      display: flex;
+      gap: 10px;
+      color: #1f2c35;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .info-card strong { color: var(--green); }
+    .actions {
+      padding: 12px 2px 6px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 260px;
+      height: 56px;
+      background: linear-gradient(120deg, var(--green), var(--green-2));
+      color: white;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(12, 138, 62, 0.25);
+      font-family: inherit;
+    }
+    .btn:hover { background: linear-gradient(120deg, #0a7435, #099443); }
+    .btn:disabled { background: #9ca3af; box-shadow: none; cursor: not-allowed; }
+    .ghost {
+      background: #e9f3ed;
+      color: var(--green);
+      border: 1px solid rgba(12, 138, 62, 0.3);
+      box-shadow: none;
+      font-weight: 700;
+    }
+    .ghost:hover { background: #dceee2; }
+    .pill {
+      display: inline-block;
+      background: rgba(12, 138, 62, 0.1);
+      color: var(--green);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-inline-start: 6px;
+    }
+    
+    /* Result sections */
+    .result-section {
+      display: none;
+      margin-top: 14px;
+    }
+    .result-section.active { display: block; }
+    
+    .success-card {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .success-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .success-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+    .success-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #065f46;
+    }
+    .success-subtitle {
+      font-size: 14px;
+      color: #047857;
+      margin-top: 2px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .status-badge.approved {
+      background: #dcfce7;
+      color: #065f46;
+    }
+    .status-badge.ready {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .link-box {
+      background: white;
+      border: 2px dashed var(--green);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .link-box-title {
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .link-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .link-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      direction: ltr;
+      text-align: left;
+      background: #f9fafb;
+    }
+    .copy-btn {
+      padding: 12px 20px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: #0a7435; }
+    .copy-msg {
+      font-size: 13px;
+      color: #065f46;
+      margin-top: 8px;
+      display: none;
+    }
+    
+    .download-card {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 1px solid #93c5fd;
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .download-icon {
+      width: 64px;
+      height: 64px;
+      background: #2563eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: white;
+      font-size: 28px;
+    }
+    .download-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+    .download-info {
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 16px 0;
+      text-align: right;
+      line-height: 1.8;
+    }
+    .download-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: #2563eb;
+      color: white;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .download-btn:hover { background: #1d4ed8; }
+    
+    /* Verification Box */
+    .verify-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .verify-box.success {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+    .verify-box.warning {
+      background: #fefce8;
+      border-color: #fde047;
+    }
+    .verify-box.error {
+      background: #fef2f2;
+      border-color: #fca5a5;
+    }
+    .verify-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .verify-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .verify-box.success .verify-icon {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .verify-box.warning .verify-icon {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    .verify-box.error .verify-icon {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .verify-title {
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .verify-message {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+    .verify-items {
+      display: grid;
+      gap: 6px;
+    }
+    .verify-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 10px;
+      background: white;
+      border-radius: 6px;
+    }
+    .verify-item.pass {
+      color: #166534;
+    }
+    .verify-item.fail {
+      color: #991b1b;
+    }
+    .verify-confidence {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .confidence-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .confidence-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-top: 14px;
+      display: none;
+    }
+    
+    @media (max-width: 640px) {
+      .content { padding: 22px 18px 28px; }
+      .screen { border-radius: 18px; }
+      .header { padding: 26px 20px 32px; }
+      .header-title { font-size: 21px; }
+      .link-input-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="screen">
+  <div class="header">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div></div>
+      <a href="track.html" style="color:rgba(255,255,255,0.9); text-decoration:none; font-weight:600; font-size:14px; background:rgba(255,255,255,0.15); padding:8px 16px; border-radius:8px;">
+         تتتبع حالة الطلب
+      </a>
+    </div>
+    <div class="header-title">طلب تصريح لقطات الكاميرات</div>
+    <p class="header-subtitle">أدخل بيانات الطلب بدقة لتسهيل معالجة المعاملة</p>
+    <div class="progress">
+      <div class="progress-segment"><div class="progress-fill" id="progress-1"></div></div>
+      <div class="progress-segment"><div class="progress-fill" id="progress-2"></div></div>
+    </div>
+  </div>
+  
+  <div class="content">
+    <!-- Form Section -->
+    <form id="requestForm">
+      <div class="section">
+        <h3 class="section-title"><span>1</span>بيانات الطلب</h3>
+        
+        <div class="label">إرفاق التقرير <span class="pill">PDF</span></div>
+        <div class="field">
+          <input type="file" id="report" name="report" accept=".pdf,application/pdf" required>
+          <div class="hint">أقصى حجم 10 م.ب — تأكد من وضوح المستند — PDF فقط</div>
+        </div>
+        
+        <div class="label">العنوان الوطني المختصر</div>
+        <div class="field">
+          <input type="text" id="address" name="national_address" class="input" placeholder="مثال: RARA3017" maxlength="8" required>
+          <div class="hint">العنوان مكوّن من 4 أحرف و 4 أرقام مثل RARA3017</div>
+        </div>
+        
+        <div class="label">اسم الشارع <span class="optional">(اختياري)</span></div>
+        <div class="field">
+          <input type="text" id="street" name="street_name" class="input" placeholder="اكتب اسم الشارع">
+        </div>
+      </div>
+      
+      <div class="section">
+        <h3 class="section-title"><span>2</span>الوقت المطلوب</h3>
+        
+        <div class="label">التاريخ</div>
+        <div class="field">
+          <input type="date" id="incidentDate" name="incident_date" class="date-input input" required>
+        </div>
+        
+        <div class="label">الوقت (حد أقصى 30 دقيقة بين البداية والنهاية)</div>
+        <div class="time-row">
+          <div class="time-field">
+            <div class="time-label">وقت البداية</div>
+            <div class="time-input-group">
+              <input type="number" id="startHour" min="1" max="12" placeholder="12" class="time-num" required>
+              <span class="time-sep">:</span>
+              <input type="number" id="startMin" min="0" max="59" placeholder="00" class="time-num" required>
+              <select id="startPeriod" class="time-period">
+                <option value="AM">ص</option>
+                <option value="PM">م</option>
+              </select>
+            </div>
+            <input type="hidden" id="startTime" name="incident_start">
+          </div>
+          <div class="time-field">
+            <div class="time-label">وقت النهاية</div>
+            <div class="time-input-group">
+              <input type="number" id="endHour" min="1" max="12" placeholder="12" class="time-num" required>
+              <span class="time-sep">:</span>
+              <input type="number" id="endMin" min="0" max="59" placeholder="00" class="time-num" required>
+              <select id="endPeriod" class="time-period">
+                <option value="AM">ص</option>
+                <option value="PM">م</option>
+              </select>
+            </div>
+            <input type="hidden" id="endTime" name="incident_end">
+          </div>
+        </div>
+        <div id="timeError" class="time-error"></div>
+        
+        <div class="info-card">
+          <div>
+            <strong>تنبيه:</strong>
+            يجب ألا تتجاوز المدة 30 دقيقة. مثال: من 12:00 ص إلى 12:30 ص
+            <div style="margin-top:8px; color:#475569;">هذا هو الإطار الزمني الذي سيُراجعه صاحب المنشأة لاستخراج المقطع المطلوب.</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button type="submit" class="btn" id="submitBtn">إرسال الطلب</button>
+        <button type="reset" class="btn ghost" id="resetBtn">إعادة تعبئة</button>
+      </div>
+    </form>
+    
+    <div id="errorBox" class="error-box"></div>
+    
+    <!-- Success Result Section -->
+    <div id="resultSection" class="result-section">
+      <div class="success-card">
+        <div class="success-header">
+          <div class="success-icon">&#10003;</div>
+          <div>
+            <div class="success-title">تم إرسال الطلب بنجاح</div>
+            <div class="success-subtitle">رقم الطلب: <span id="requestIdSpan">-</span></div>
+          </div>
+        </div>
+        
+        <div id="statusBadge" class="status-badge approved">
+          <span>&#9679;</span> حالة الطلب: مقبول - في انتظار رفع الفيديو
+        </div>
+        
+        <!-- Verification Box -->
+        <div id="verifyBox" class="verify-box" style="display:none;">
+          <div class="verify-header">
+            <div id="verifyIcon" class="verify-icon">✓</div>
+            <div id="verifyTitle" class="verify-title">التحقق من التقرير</div>
+          </div>
+          <div id="verifyMessage" class="verify-message"></div>
+          <div id="verifyItems" class="verify-items"></div>
+          <div id="verifyConfidence" class="verify-confidence"></div>
+        </div>
+        
+        <div class="link-box">
+          <div class="link-box-title">رابط رفع الفيديو (أرسله لمسؤول التخزين عبر واتساب أو إيميل)</div>
+          <div class="link-input-row">
+            <input type="text" id="adminLinkInput" class="link-input" readonly>
+            <button type="button" id="copyBtn" class="copy-btn">نسخ الرابط</button>
+          </div>
+          <div id="copyMsg" class="copy-msg">تم نسخ الرابط!</div>
+        </div>
+        
+        <div style="margin-top:16px; text-align:center;">
+          <a id="trackLink" href="#" style="color:var(--green); font-weight:600; text-decoration:none;">
+            تتبع حالة الطلب &#8592;
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Download Section -->
+    <div id="downloadSection" class="result-section">
+      <div class="download-card">
+        <div class="download-icon">&#8681;</div>
+        <div class="download-title">تم تجهيز الفيديو!</div>
+        <div class="download-info" id="incidentInfo"></div>
+        <a id="downloadLink" href="#" class="download-btn" target="_blank">تحميل الفيديو</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8000/api"
+    : "https://api.absher.gov.sa/api";
+
+  const form = document.getElementById("requestForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const errorBox = document.getElementById("errorBox");
+  const resultSection = document.getElementById("resultSection");
+  const downloadSection = document.getElementById("downloadSection");
+  const requestIdSpan = document.getElementById("requestIdSpan");
+  const statusBadge = document.getElementById("statusBadge");
+  const adminLinkInput = document.getElementById("adminLinkInput");
+  const copyBtn = document.getElementById("copyBtn");
+  const copyMsg = document.getElementById("copyMsg");
+  const downloadLink = document.getElementById("downloadLink");
+  const incidentInfo = document.getElementById("incidentInfo");
+  const progress1 = document.getElementById("progress-1");
+  const progress2 = document.getElementById("progress-2");
+
+  let currentRequestId = null;
+  let pollInterval = null;
+  let currentIncident = null;
+
+  // Time input elements
+  const startHour = document.getElementById("startHour");
+  const startMin = document.getElementById("startMin");
+  const startPeriod = document.getElementById("startPeriod");
+  const endHour = document.getElementById("endHour");
+  const endMin = document.getElementById("endMin");
+  const endPeriod = document.getElementById("endPeriod");
+  const startTimeHidden = document.getElementById("startTime");
+  const endTimeHidden = document.getElementById("endTime");
+  const timeError = document.getElementById("timeError");
+
+  // Convert 12h to 24h format
+  function to24Hour(hour, min, period) {
+    let h = parseInt(hour) || 0;
+    const m = parseInt(min) || 0;
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return h * 60 + m; // Return total minutes for comparison
+  }
+
+  // Format time for hidden input (HH:MM)
+  function formatTime(hour, min, period) {
+    let h = parseInt(hour) || 0;
+    const m = parseInt(min) || 0;
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+
+  // Validate time range
+  function validateTimeRange() {
+    const sh = startHour.value;
+    const sm = startMin.value;
+    const sp = startPeriod.value;
+    const eh = endHour.value;
+    const em = endMin.value;
+    const ep = endPeriod.value;
+
+    if (!sh || !sm || !eh || !em) {
+      timeError.classList.remove("show");
+      return true; // Not filled yet
+    }
+
+    const startMins = to24Hour(sh, sm, sp);
+    const endMins = to24Hour(eh, em, ep);
+    const diff = endMins - startMins;
+
+    // Update hidden inputs
+    startTimeHidden.value = formatTime(sh, sm, sp);
+    endTimeHidden.value = formatTime(eh, em, ep);
+
+    if (endMins <= startMins) {
+      timeError.textContent = "وقت النهاية يجب أن يكون بعد وقت البداية";
+      timeError.classList.add("show");
+      return false;
+    }
+
+    if (diff > 30) {
+      timeError.textContent = "الفرق بين الوقتين يجب ألا يتجاوز 30 دقيقة (الفرق الحالي: " + diff + " دقيقة)";
+      timeError.classList.add("show");
+      return false;
+    }
+
+    timeError.classList.remove("show");
+    return true;
+  }
+
+  // Pad number inputs
+  function padHourInput(input) {
+    input.addEventListener("blur", () => {
+      let val = parseInt(input.value) || 12;
+      if (val > 12) val = 12;
+      if (val < 1) val = 1;
+      input.value = String(val).padStart(2, '0');
+      validateTimeRange();
+      updateProgress();
+    });
+    input.addEventListener("input", () => {
+      validateTimeRange();
+      updateProgress();
+    });
+  }
+
+  function padMinInput(input) {
+    input.addEventListener("blur", () => {
+      let val = parseInt(input.value) || 0;
+      if (val > 59) val = 59;
+      if (val < 0) val = 0;
+      input.value = String(val).padStart(2, '0');
+      validateTimeRange();
+      updateProgress();
+    });
+    input.addEventListener("input", () => {
+      validateTimeRange();
+      updateProgress();
+    });
+  }
+
+  padHourInput(startHour);
+  padMinInput(startMin);
+  padHourInput(endHour);
+  padMinInput(endMin);
+  startPeriod.addEventListener("change", () => { validateTimeRange(); updateProgress(); });
+  endPeriod.addEventListener("change", () => { validateTimeRange(); updateProgress(); });
+
+  // Update progress bar based on form completion
+  function updateProgress() {
+    const report = document.getElementById("report").files.length > 0;
+    const address = document.getElementById("address").value.trim() !== "";
+    const date = document.getElementById("incidentDate").value !== "";
+    const start = startHour.value && startMin.value;
+    const end = endHour.value && endMin.value;
+    
+    const step1 = (report && address) ? 100 : (report || address) ? 50 : 0;
+    const step2 = (date && start && end) ? 100 : (date || start || end) ? 50 : 0;
+    
+    progress1.style.width = step1 + "%";
+    progress2.style.width = step2 + "%";
+  }
+
+  document.querySelectorAll("input:not(.time-num)").forEach(input => {
+    input.addEventListener("change", updateProgress);
+    input.addEventListener("input", updateProgress);
+  });
+
+  // Validate national address format (4 letters + 4 numbers)
+  function validateNationalAddress(address) {
+    const pattern = /^[A-Za-z]{4}[0-9]{4}$/;
+    return pattern.test(address);
+  }
+
+  // Validate date is not too far in future
+  function validateDate(dateStr) {
+    const selected = new Date(dateStr);
+    const today = new Date();
+    const maxFuture = new Date();
+    maxFuture.setDate(today.getDate() + 30); // Max 30 days in future
+    
+    if (selected > maxFuture) {
+      return { valid: false, msg: "التاريخ لا يمكن أن يكون بعد 30 يوم من اليوم" };
+    }
+    return { valid: true };
+  }
+
+  // Validate file type
+  function validateFileType(file) {
+    if (!file) return { valid: false, msg: "الرجاء إرفاق التقرير" };
+    const allowedTypes = ['application/pdf'];
+    const fileName = file.name.toLowerCase();
+    if (!allowedTypes.includes(file.type) && !fileName.endsWith('.pdf')) {
+      return { valid: false, msg: "يجب أن يكون الملف بصيغة PDF فقط" };
+    }
+    if (file.size > 10 * 1024 * 1024) { // 10MB
+      return { valid: false, msg: "حجم الملف يجب ألا يتجاوز 10 ميجابايت" };
+    }
+    return { valid: true };
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.style.display = "none";
+    
+    // Validate national address
+    const addressVal = document.getElementById("address").value.trim();
+    if (!validateNationalAddress(addressVal)) {
+      errorBox.textContent = "العنوان الوطني يجب أن يتكون من 4 أحرف إنجليزية و 4 أرقام (مثال: RARA3017)";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    // Validate file
+    const fileInput = document.getElementById("report");
+    const fileValidation = validateFileType(fileInput.files[0]);
+    if (!fileValidation.valid) {
+      errorBox.textContent = fileValidation.msg;
+      errorBox.style.display = "block";
+      return;
+    }
+
+    // Validate date
+    const dateVal = document.getElementById("incidentDate").value;
+    const dateValidation = validateDate(dateVal);
+    if (!dateValidation.valid) {
+      errorBox.textContent = dateValidation.msg;
+      errorBox.style.display = "block";
+      return;
+    }
+
+    // Validate time range
+    if (!validateTimeRange()) {
+      return;
+    }
+
+    // Check if time inputs are filled
+    if (!startHour.value || !startMin.value || !endHour.value || !endMin.value) {
+      errorBox.textContent = "الرجاء إدخال وقت البداية والنهاية";
+      errorBox.style.display = "block";
+      return;
+    }
+    
+    // Format display time with AM/PM
+    const startDisplay = `${startHour.value}:${String(startMin.value).padStart(2,'0')} ${startPeriod.value === 'AM' ? 'ص' : 'م'}`;
+    const endDisplay = `${endHour.value}:${String(endMin.value).padStart(2,'0')} ${endPeriod.value === 'AM' ? 'ص' : 'م'}`;
+    
+    currentIncident = {
+      date: document.getElementById("incidentDate").value,
+      start: startDisplay,
+      end: endDisplay,
+      address: document.getElementById("address").value
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "جاري الإرسال...";
+
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch(`${API_BASE}/requests`, { method: "POST", body: data });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "تعذر إرسال الطلب");
+      }
+      const body = await res.json();
+      currentRequestId = body.request_id;
+      
+      requestIdSpan.textContent = body.request_id;
+      adminLinkInput.value = body.admin_link;
+      document.getElementById("trackLink").href = `track.html?id=${body.request_id}`;
+      
+      // Show verification results if available
+      if (body.verification) {
+        showVerification(body.verification);
+      }
+      
+      form.style.display = "none";
+      resultSection.classList.add("active");
+      
+      progress1.style.width = "100%";
+      progress2.style.width = "100%";
+      
+      startPolling();
+    } catch (err) {
+      errorBox.textContent = err.message || "خطأ غير متوقع";
+      errorBox.style.display = "block";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "إرسال الطلب";
+    }
+  });
+
+  copyBtn.addEventListener("click", () => {
+    adminLinkInput.select();
+    document.execCommand("copy");
+    copyMsg.style.display = "block";
+    setTimeout(() => { copyMsg.style.display = "none"; }, 2500);
+  });
+
+  async function pollStatus() {
+    if (!currentRequestId) return;
+    try {
+      const res = await fetch(`${API_BASE}/requests/${currentRequestId}`);
+      const body = await res.json();
+      
+      if (body.status === "READY" && body.download_token) {
+        clearInterval(pollInterval);
+        
+        statusBadge.className = "status-badge ready";
+        statusBadge.innerHTML = "<span>&#10003;</span> حالة الطلب: جاهز للتحميل";
+        
+        incidentInfo.innerHTML = `
+          <div><strong>العنوان:</strong> ${currentIncident?.address || "-"}</div>
+          <div><strong>التاريخ:</strong> ${currentIncident?.date || "-"}</div>
+          <div><strong>الوقت:</strong> من ${currentIncident?.start || "-"} إلى ${currentIncident?.end || "-"}</div>
+        `;
+        
+        downloadLink.href = `${API_BASE}/requests/${currentRequestId}/download?token=${body.download_token}`;
+        downloadSection.classList.add("active");
+      }
+    } catch (_) {
+      // Silent fail
+    }
+  }
+
+  function startPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(pollStatus, 3000);
+    pollStatus();
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    form.reset();
+    updateProgress();
+  });
+
+  // Show verification results
+  function showVerification(v) {
+    const box = document.getElementById("verifyBox");
+    const icon = document.getElementById("verifyIcon");
+    const title = document.getElementById("verifyTitle");
+    const message = document.getElementById("verifyMessage");
+    const items = document.getElementById("verifyItems");
+    const confidence = document.getElementById("verifyConfidence");
+    
+    // Set status class based on confidence
+    box.className = "verify-box";
+    if (v.confidence >= 80) {
+      box.classList.add("success");
+      icon.textContent = "✓";
+      title.textContent = "تم التحقق من التقرير بنجاح";
+    } else if (v.confidence >= 50) {
+      box.classList.add("warning");
+      icon.textContent = "!";
+      title.textContent = "تحقق جزئي من التقرير";
+    } else {
+      box.classList.add("error");
+      icon.textContent = "✗";
+      title.textContent = "تحذير: بيانات التقرير غير متطابقة";
+    }
+    
+    message.textContent = v.message;
+    
+    // Show match items
+    let itemsHtml = "";
+    if (v.matches) {
+      for (const [key, value] of Object.entries(v.matches)) {
+        const isPass = value.includes("✓") || value.includes("مطابق");
+        const icon = isPass ? "✓" : "✗";
+        const cls = isPass ? "pass" : "fail";
+        itemsHtml += `<div class="verify-item ${cls}"><span>${icon}</span> ${value}</div>`;
+      }
+    }
+    items.innerHTML = itemsHtml;
+    
+    // Show confidence bar
+    const confColor = v.confidence >= 80 ? "#22c55e" : v.confidence >= 50 ? "#eab308" : "#ef4444";
+    confidence.innerHTML = `
+      نسبة التطابق: ${v.confidence}%
+      <div class="confidence-bar">
+        <div class="confidence-fill" style="width:${v.confidence}%; background:${confColor};"></div>
+      </div>
+    `;
+    
+    box.style.display = "block";
+  }
+</script>
+</body>
+</html>

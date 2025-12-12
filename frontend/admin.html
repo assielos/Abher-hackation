@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رفع فيديو الحادث - مسؤول التخزين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #0c8a3e;
+      --green-light: #e8f5ed;
+      --border: #e2e8f0;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Tajawal", sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      padding: 30px 16px;
+      color: var(--text);
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .info-item {
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 10px;
+    }
+    .info-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .info-value {
+      font-weight: 700;
+      font-size: 15px;
+    }
+    
+    .upload-section {
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .upload-label {
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .file-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: #fafafa;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .file-input:focus {
+      border-color: var(--green);
+      outline: none;
+    }
+    
+    .btn {
+      width: 100%;
+      height: 52px;
+      margin-top: 16px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .status-msg {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+    }
+    .status-msg.loading {
+      display: block;
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    .status-msg.error {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+    .status-msg.success {
+      display: block;
+      background: var(--green-light);
+      color: #065f46;
+    }
+    
+    .success-card {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 32px;
+      color: var(--green);
+    }
+    .success-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .success-desc {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 500px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loadingCard" class="card">
+      <div style="text-align:center; padding:20px; color:var(--muted);">جاري تحميل بيانات الطلب...</div>
+    </div>
+    
+    <div id="mainCard" class="card" style="display:none;">
+      <h1 class="page-title">رفع فيديو الحادث</h1>
+      <p class="page-subtitle">تأكد من رفع المقطع المطلوب حسب التاريخ والوقت المحدد</p>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">رقم الطلب</div>
+          <div class="info-value" id="requestIdField">-</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">العنوان الوطني</div>
+          <div class="info-value" id="addressField">-</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">التاريخ</div>
+          <div class="info-value" id="dateField">-</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">الوقت</div>
+          <div class="info-value" id="timeField">-</div>
+        </div>
+      </div>
+      
+      <div class="upload-section">
+        <form id="uploadForm">
+          <div class="upload-label">اختر ملف الفيديو</div>
+          <input type="file" id="videoInput" class="file-input" accept="video/*" required>
+          <button type="submit" id="uploadBtn" class="btn">رفع الفيديو</button>
+        </form>
+        <div id="statusMsg" class="status-msg"></div>
+      </div>
+    </div>
+    
+    <div id="successCard" class="card" style="display:none;">
+      <div class="success-card">
+        <div class="success-icon">&#10003;</div>
+        <div class="success-title">تم رفع الفيديو بنجاح</div>
+        <div class="success-desc">تم إرسال إشعار لصاحب الطلب بجاهزية الفيديو للتحميل</div>
+      </div>
+    </div>
+    
+    <div id="errorCard" class="card" style="display:none;">
+      <div style="text-align:center; padding:20px; color:#991b1b;">
+        <div style="font-size:18px; font-weight:700; margin-bottom:8px;">رابط غير صالح</div>
+        <div id="errorText">تأكد من استخدام الرابط الصحيح من صاحب الطلب</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? "http://localhost:8000/api"
+      : "https://api.absher.gov.sa/api";
+
+    const params = new URLSearchParams(window.location.search);
+    const requestId = params.get("request_id");
+    const token = params.get("token");
+
+    const loadingCard = document.getElementById("loadingCard");
+    const mainCard = document.getElementById("mainCard");
+    const successCard = document.getElementById("successCard");
+    const errorCard = document.getElementById("errorCard");
+    const uploadForm = document.getElementById("uploadForm");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const statusMsg = document.getElementById("statusMsg");
+
+    async function loadData() {
+      if (!requestId || !token) {
+        showError("رابط غير مكتمل");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/requests/${requestId}/meta?token=${token}`);
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "فشل تحميل البيانات");
+        }
+        const data = await res.json();
+        
+        document.getElementById("requestIdField").textContent = data.request_id;
+        document.getElementById("addressField").textContent = data.national_address || "-";
+        document.getElementById("dateField").textContent = data.incident_date || "-";
+        document.getElementById("timeField").textContent = `${data.incident_start} - ${data.incident_end}`;
+        
+        loadingCard.style.display = "none";
+        mainCard.style.display = "block";
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    function showError(msg) {
+      loadingCard.style.display = "none";
+      document.getElementById("errorText").textContent = msg;
+      errorCard.style.display = "block";
+    }
+
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const videoFile = document.getElementById("videoInput").files[0];
+      if (!videoFile) {
+        statusMsg.textContent = "الرجاء اختيار ملف فيديو";
+        statusMsg.className = "status-msg error";
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "جاري الرفع...";
+      statusMsg.textContent = "جاري رفع الفيديو...";
+      statusMsg.className = "status-msg loading";
+
+      const formData = new FormData();
+      formData.append("video", videoFile);
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/upload?token=${token}&request_id=${requestId}`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "فشل رفع الفيديو");
+        }
+
+        mainCard.style.display = "none";
+        successCard.style.display = "block";
+      } catch (err) {
+        statusMsg.textContent = err.message;
+        statusMsg.className = "status-msg error";
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "رفع الفيديو";
+      }
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
