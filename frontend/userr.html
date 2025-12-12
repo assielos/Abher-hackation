@@ -705,11 +705,12 @@
           <div id="verifyConfidence" class="verify-confidence"></div>
         </div>
         
-        <div class="link-box">
-          <div class="link-box-title">رابط رفع الفيديو (أرسله لمسؤول التخزين عبر واتساب أو إيميل)</div>
+        <div class="link-box admin-link-section">
+          <div class="link-box-title">صفحة رفع الفيديو</div>
           <div class="link-input-row">
             <input type="text" id="adminLinkInput" class="link-input" readonly>
-            <button type="button" id="copyBtn" class="copy-btn">نسخ الرابط</button>
+            <button type="button" id="copyBtn" class="copy-btn">نسخ</button>
+            <a id="adminPageBtn" href="#" target="_blank" class="copy-btn" style="background:var(--green); text-decoration:none; text-align:center;">الدخول للصفحة</a>
           </div>
           <div id="copyMsg" class="copy-msg">تم نسخ الرابط!</div>
         </div>
@@ -1011,6 +1012,7 @@
       
       requestIdSpan.textContent = body.request_id;
       adminLinkInput.value = body.admin_link;
+      document.getElementById("adminPageBtn").href = body.admin_link;
       document.getElementById("trackLink").href = `track.html?id=${body.request_id}`;
       
       // Show verification results if available
