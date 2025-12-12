@@ -88,6 +88,7 @@ class SubmitResponse(BaseModel):
     request_id: int
     upload_token: str
     admin_link: str
+    status: str = "PENDING_APPROVAL"
     verification: Optional[VerificationInfo] = None
 
 
@@ -152,8 +153,21 @@ async def create_request(
                 matches=verify_result.matches,
             )
             logger.info("Verification result: confidence=%d", verify_result.confidence)
+            
+            # Reject request if confidence < 80%
+            if verify_result.confidence < 80:
+                models.reject_request(request_id)
+                request_status = models.STATUS_REJECTED
+                logger.info("Request %d rejected due to low confidence (%d%%)", request_id, verify_result.confidence)
+            else:
+                # Auto-approve if confidence >= 80%
+                models.approve_request(request_id)
+                request_status = models.STATUS_APPROVED
+                logger.info("Request %d approved with confidence %d%%", request_id, verify_result.confidence)
+                
         except Exception as ve:
             logger.warning("Verification failed: %s", ve)
+            request_status = models.STATUS_PENDING
         
         upload_token = models.get_upload_token(request_id)
         admin_link = f"{FRONTEND_BASE_URL}/admin.html?request_id={request_id}&token={upload_token}"
@@ -161,6 +175,7 @@ async def create_request(
             request_id=request_id,
             upload_token=upload_token,
             admin_link=admin_link,
+            status=request_status,
             verification=verification,
         )
     except Exception as exc:  # noqa: BLE001
