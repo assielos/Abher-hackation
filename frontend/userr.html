@@ -365,6 +365,14 @@
       background: #dcfce7;
       color: #065f46;
     }
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status-badge.rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
     .status-badge.ready {
       background: #dbeafe;
       color: #1e40af;
@@ -682,8 +690,8 @@
           </div>
         </div>
         
-        <div id="statusBadge" class="status-badge approved">
-          <span>&#9679;</span> حالة الطلب: مقبول - في انتظار رفع الفيديو
+        <div id="statusBadge" class="status-badge pending">
+          <span>&#9679;</span> حالة الطلب: جاري المعالجة...
         </div>
         
         <!-- Verification Box -->
@@ -982,6 +990,18 @@
       // Show verification results if available
       if (body.verification) {
         showVerification(body.verification);
+      }
+      
+      // Update status badge based on response status
+      if (body.status === "REJECTED") {
+        statusBadge.className = "status-badge rejected";
+        statusBadge.innerHTML = "<span>&#10007;</span> حالة الطلب: مرفوض - بيانات التقرير غير متطابقة";
+      } else if (body.status === "APPROVED") {
+        statusBadge.className = "status-badge approved";
+        statusBadge.innerHTML = "<span>&#9679;</span> حالة الطلب: مقبول - في انتظار رفع الفيديو";
+      } else {
+        statusBadge.className = "status-badge pending";
+        statusBadge.innerHTML = "<span>&#9679;</span> حالة الطلب: قيد المراجعة";
       }
       
       form.style.display = "none";
